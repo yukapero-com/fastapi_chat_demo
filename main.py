@@ -23,7 +23,7 @@ html = """
         <script>
             var client_id = Date.now()
             document.querySelector("#ws-id").textContent = client_id;
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+            var ws = new WebSocket(`ws://fastapi-chat-server-demo.herokuapp.com/ws/${client_id}`);
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
@@ -41,7 +41,6 @@ html = """
     </body>
 </html>
 """
-
 
 class ConnectionManager:
     def __init__(self):
