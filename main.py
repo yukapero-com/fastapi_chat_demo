@@ -1,11 +1,15 @@
 from typing import List
 
+import json
+import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
 html = "<h1>fastapi chat server demo</h1>"
+
+messages = []
 
 class ConnectionManager:
     def __init__(self):
@@ -37,13 +41,15 @@ async def get():
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
+    await manager.send_personal_message(json.dumps(messages), websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(f"#{client_id}さんの発言: {data}")
+            dt_now = datetime.datetime.now()
+            chatText = f"#{client_id} says: {data} ({dt_now})"
+            messages.append(chatText)
+            await manager.broadcast(chatText)
 
     except WebSocketDisconnect:
-
         manager.disconnect(websocket)
-
-        await manager.broadcast(f"#{client_id}さんが退室しました")
+        await manager.broadcast(f"#{client_id} left the room")
